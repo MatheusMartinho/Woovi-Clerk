@@ -95,13 +95,13 @@
 
 **Independent Test**: quickstart Cenários 3, 4 e 5 — compra de teste ponta a ponta no link público; README reproduzível em < 5 min.
 
-- [ ] T029 [US4] Scaffold do demo em `examples/loja/`: Next.js 16 App Router, TypeScript, dependência `pixcheckout` via workspace, `transpilePackages: ["pixcheckout"]` em `examples/loja/next.config.ts`
-- [ ] T030 [US4] Handler montado em `examples/loja/app/api/pix/[...path]/route.ts`: `createWooviHandler` com `WOOVI_APP_ID` de env e `beforeCreate` fixando o preço no servidor (integridade de preço — R8); `examples/loja/.env.local.example`
-- [ ] T031 [US4] Páginas da loja: `examples/loja/app/page.tsx` (produto fictício + botão comprar), `examples/loja/app/checkout/page.tsx` (as cinco linhas literais), `examples/loja/app/obrigado/page.tsx` (destino do `onPaid`)
+- [X] T029 [US4] Scaffold do demo em `examples/loja/`: Next.js 16 App Router, TypeScript, dependência `pixcheckout` via workspace, `transpilePackages: ["pixcheckout"]` em `examples/loja/next.config.ts`
+- [X] T030 [US4] Handler montado em `examples/loja/app/api/pix/[...path]/route.ts`: `createWooviHandler` com `WOOVI_APP_ID` de env e `beforeCreate` fixando o preço no servidor (integridade de preço — R8); `examples/loja/.env.local.example`
+- [X] T031 [US4] Páginas da loja: `examples/loja/app/page.tsx` (produto fictício + botão comprar), `examples/loja/app/checkout/page.tsx` (as cinco linhas literais), `examples/loja/app/obrigado/page.tsx` (destino do `onPaid`)
 - [ ] T032 [US4] Validação local ponta a ponta (quickstart Cenário 3): pagar no sandbox, confirmar UI paga em ≤10s, Network mostra polling cessando e AppID ausente do navegador; registrar evidências (screenshots) em `specs/001-pixcheckout-library/evidencias/`
 - [ ] T033 [US4] Deploy na Vercel: projeto `examples/loja` com `WOOVI_APP_ID` nas env vars, testar o fluxo completo em aba anônima (Cenário 5), anotar a URL pública no README
-- [ ] T034 [US4] Escrever `README.md` (raiz): início rápido de 5 linhas + arquivo do handler, arquitetura em camadas ("core sem framework, hooks headless, componentes por cima"), decisão da chave (sem modo inseguro) + proposta de publishable key à Woovi com API hipotética, `beforeCreate`/integridade de preço, decisões de polling, como rodar testes/Storybook/demo, link do demo e do vídeo
-- [ ] T035 [P] [US4] Roteiro do vídeo de 2 min em `docs/video-roteiro.md`: do `create-next-app` ao Pix pago (Cenário 4 + pagamento do Cenário 3), com marcações de tempo
+- [X] T034 [US4] Escrever `README.md` (raiz): início rápido de 5 linhas + arquivo do handler, arquitetura em camadas ("core sem framework, hooks headless, componentes por cima"), decisão da chave (sem modo inseguro) + proposta de publishable key à Woovi com API hipotética, `beforeCreate`/integridade de preço, decisões de polling, como rodar testes/Storybook/demo, link do demo e do vídeo
+- [X] T035 [P] [US4] Roteiro do vídeo de 2 min em `docs/video-roteiro.md`: do `create-next-app` ao Pix pago (Cenário 4 + pagamento do Cenário 3), com marcações de tempo
 - [ ] T036 [US4] Gravar o vídeo seguindo o roteiro (tarefa do autor), publicar (YouTube não listado ou arquivo no repo) e linkar no `README.md`
 
 **Checkpoint**: Entrega completa navegável por um estranho sem ajuda.
@@ -110,9 +110,9 @@
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [ ] T037 Acessibilidade em `packages/pixcheckout/src/react/`: `aria-live="polite"` nas mudanças de estado, labels nos botões, foco visível, contraste dos defaults do tema
+- [X] T037 Acessibilidade em `packages/pixcheckout/src/react/`: `aria-live="polite"` nas mudanças de estado, labels nos botões, foco visível, contraste dos defaults do tema
 - [ ] T038 [P] Teste dos cinco minutos (quickstart Cenário 4): app Next limpo fora do monorepo, seguir só o README com cronômetro; corrigir o README onde travar
-- [ ] T039 Limpeza final: `npx tsc --noEmit` no pacote e no demo, remover código morto e comentários de rascunho, nomes consistentes em pt-BR nos textos e en nos identificadores
+- [X] T039 Limpeza final: `npx tsc --noEmit` no pacote e no demo, remover código morto e comentários de rascunho, nomes consistentes em pt-BR nos textos e en nos identificadores
 - [ ] T040 Validação final: percorrer quickstart.md inteiro (Cenários 0–5) e marcar o checklist de entrega do guia; pendências viram issues no README ou são resolvidas
 
 ---
