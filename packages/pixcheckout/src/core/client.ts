@@ -1,5 +1,5 @@
-import type { Charge, ChargeStatus, CreateChargePayload } from './types';
-import { PixApiError, PixValidationError } from './types';
+import type { Charge, ChargeStatus, CreateChargePayload } from './types.ts';
+import { PixApiError, PixValidationError } from './types.ts';
 
 export interface CoreClientOptions {
   /** Injetavel para testes: nenhum mock global de rede e necessario. */

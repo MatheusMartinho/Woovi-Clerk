@@ -14,10 +14,10 @@
 
 **Purpose**: Monorepo funcionando com pacote da biblioteca, testes e Storybook prontos para receber código.
 
-- [ ] T001 Converter a raiz em npm workspaces: editar `package.json` da raiz (workspaces `["packages/*", "examples/*"]`, scripts `test`/`storybook` delegando ao pacote), preservando o script `cobranca` existente
-- [ ] T002 Criar `packages/pixcheckout/package.json` (name `pixcheckout`, type module, exports `.`/`./core`/`./server` apontando para src/, peerDependencies react ≥18, dependency `uqr`) e `packages/pixcheckout/tsconfig.json` (strict, jsx react-jsx, noEmit)
-- [ ] T003 [P] Configurar Vitest + Testing Library em `packages/pixcheckout/vitest.config.ts` e `packages/pixcheckout/src/test-setup.ts` (environment jsdom, globals, cleanup)
-- [ ] T004 [P] Inicializar Storybook (builder Vite, framework react-vite) em `packages/pixcheckout/.storybook/main.ts` e `preview.ts`
+- [X] T001 Converter a raiz em npm workspaces: editar `package.json` da raiz (workspaces `["packages/*", "examples/*"]`, scripts `test`/`storybook` delegando ao pacote), preservando o script `cobranca` existente
+- [X] T002 Criar `packages/pixcheckout/package.json` (name `pixcheckout`, type module, exports `.`/`./core`/`./server` apontando para src/, peerDependencies react ≥18, dependency `uqr`) e `packages/pixcheckout/tsconfig.json` (strict, jsx react-jsx, noEmit)
+- [X] T003 [P] Configurar Vitest + Testing Library em `packages/pixcheckout/vitest.config.ts` e `packages/pixcheckout/src/test-setup.ts` (environment jsdom, globals, cleanup)
+- [X] T004 [P] Inicializar Storybook (builder Vite, framework react-vite) em `packages/pixcheckout/.storybook/main.ts` e `preview.ts`
 
 ---
 
@@ -27,12 +27,12 @@
 
 **⚠️ CRITICAL**: Nenhuma user story começa antes desta fase terminar.
 
-- [ ] T005 Criar `packages/pixcheckout/src/core/types.ts`: `Charge`, `ChargeStatus`, `CheckoutState` (união discriminada), `CheckoutEvent`, `PixError`/`PixApiError`/`PixValidationError` — exatamente como em data-model.md
-- [ ] T006 Criar `packages/pixcheckout/src/core/client.ts`: `createCoreClient(baseUrl, { fetch?, headers? })` com `createCharge`/`getCharge`, normalização da resposta (mapa de status, `expiresIn`/`expiresDate` → `expiresAt` epoch ms), validação de `value` inteiro > 0, fallback GET quando POST devolve conflito de correlationID (R9), erros tipados — contrato em contracts/woovi-api.md
-- [ ] T007 [P] Criar `packages/pixcheckout/src/core/machine.ts`: `transition(state, event)` puro implementando a tabela completa de data-model.md (incluindo "pago vence expirado"; evento não mapeado → estado inalterado)
-- [ ] T008 [P] Criar `packages/pixcheckout/src/core/polling.ts`: `nextDelay(elapsedMs)` (3_000 até 120_000ms, depois 10_000) e constante `MAX_CONSECUTIVE_FAILURES = 3` (R5)
-- [ ] T009 [P] Criar `packages/pixcheckout/src/i18n/texts.ts`: objeto único com todos os textos pt-BR (FR-022) + `formatBRL(cents)` via `Intl.NumberFormat` + `formatCountdown(ms)` → `mm:ss`
-- [ ] T010 [P] Testes das funções puras: `packages/pixcheckout/src/core/machine.test.ts` (todas as células da tabela de transições) e `packages/pixcheckout/src/core/polling.test.ts` (fronteira 3s→10s aos 2min)
+- [X] T005 Criar `packages/pixcheckout/src/core/types.ts`: `Charge`, `ChargeStatus`, `CheckoutState` (união discriminada), `CheckoutEvent`, `PixError`/`PixApiError`/`PixValidationError` — exatamente como em data-model.md
+- [X] T006 Criar `packages/pixcheckout/src/core/client.ts`: `createCoreClient(baseUrl, { fetch?, headers? })` com `createCharge`/`getCharge`, normalização da resposta (mapa de status, `expiresIn`/`expiresDate` → `expiresAt` epoch ms), validação de `value` inteiro > 0, fallback GET quando POST devolve conflito de correlationID (R9), erros tipados — contrato em contracts/woovi-api.md
+- [X] T007 [P] Criar `packages/pixcheckout/src/core/machine.ts`: `transition(state, event)` puro implementando a tabela completa de data-model.md (incluindo "pago vence expirado"; evento não mapeado → estado inalterado)
+- [X] T008 [P] Criar `packages/pixcheckout/src/core/polling.ts`: `nextDelay(elapsedMs)` (3_000 até 120_000ms, depois 10_000) e constante `MAX_CONSECUTIVE_FAILURES = 3` (R5)
+- [X] T009 [P] Criar `packages/pixcheckout/src/i18n/texts.ts`: objeto único com todos os textos pt-BR (FR-022) + `formatBRL(cents)` via `Intl.NumberFormat` + `formatCountdown(ms)` → `mm:ss`
+- [X] T010 [P] Testes das funções puras: `packages/pixcheckout/src/core/machine.test.ts` (todas as células da tabela de transições) e `packages/pixcheckout/src/core/polling.test.ts` (fronteira 3s→10s aos 2min)
 - [ ] T011 Verificação no sandbox (quickstart Cenário 0): rodar `npm run cobranca` duas vezes com o mesmo correlationID; registrar em research.md as respostas das 3 pendências ⚠ (idempotência do POST, campo de expiração real, como simular pagamento); ajustar normalização em `src/core/client.ts` se necessário. *Pré-condição: AppID no `.env`*
 
 **Checkpoint**: Core provado contra a API real; máquina 100% testada sem React.
@@ -45,17 +45,17 @@
 
 **Independent Test**: quickstart Cenários 1 e 2 — testes verdes (parada/cleanup/StrictMode) e as 5 histórias no Storybook renderizando offline.
 
-- [ ] T012 [US1] Criar `packages/pixcheckout/src/server/handler.ts`: `createWooviHandler({ appId, baseUrl?, beforeCreate? })` → `(Request) => Promise<Response>` com os 2 endpoints, formato de erro único, throw na inicialização sem appId, sem vazar detalhes da Woovi — contrato em contracts/server-handler.md
-- [ ] T013 [P] [US1] Testes do handler em `packages/pixcheckout/src/server/handler.test.ts`: rota desconhecida → 404, `beforeCreate` substitui payload (fixa preço), appId ausente lança, corpo inválido → 400 `validation`, resposta de erro não contém o appId
-- [ ] T014 [US1] Criar `packages/pixcheckout/src/react/theme.ts`: stylesheet única da biblioteca (classes `pixck-*`, CSS variables `--pixck-*` com defaults apresentáveis), `appearanceToVars(appearance)`, injeção idempotente da tag `<style>` (R7)
-- [ ] T015 [US1] Criar `packages/pixcheckout/src/react/WooviProvider.tsx`: contexto com `endpoint` + `appearance` + client core criado a partir do endpoint (aceita client injetável para testes/histórias), injeta stylesheet, erro claro se hook/componente usado fora do provider
-- [ ] T016 [US1] Criar `packages/pixcheckout/src/react/usePixCharge.ts`: correlationID preguiçoso por intenção (sobrevive StrictMode), criação com AbortController, polling com `setTimeout` encadeado usando `nextDelay`, pausa/checagem via `visibilitychange`, contador derivado de `expiresAt` com checagem final ao zerar, contador de falhas consecutivas, ações `retry`/`newCharge` (novo correlationID), `onPaid`/`onExpired` disparados uma única vez, cleanup total no desmonte — retorno conforme contracts/react-api.md
-- [ ] T017 [US1] Testes do hook em `packages/pixcheckout/src/react/usePixCharge.test.tsx` (fake timers + client falso): montagem dupla StrictMode cria UMA cobrança; polling para após paid e após expired; zero chamadas/timers após desmonte; 3 falhas seguidas → error, sucesso no meio zera o contador; pago-vence-expirado na checagem final
-- [ ] T018 [P] [US1] Criar subcomponentes: `packages/pixcheckout/src/react/PixQRCode.tsx` (SVG local via uqr a partir do brCode), `packages/pixcheckout/src/react/PixCopyButton.tsx` (clipboard + "copiado ✓" por 2s — FR-008), `packages/pixcheckout/src/react/PixStatus.tsx` (contador mm:ss + valor formatado)
-- [ ] T019 [US1] Criar `packages/pixcheckout/src/react/PixCheckout.tsx`: compõe provider/hook/subcomponentes nas 5 interfaces de estado (skeleton no creating — FR-016; sucesso; expirado com botão nova cobrança; erro com retry), aplica appearance, props conforme contracts/react-api.md
-- [ ] T020 [US1] Testes de comportamento em `packages/pixcheckout/src/react/PixCheckout.test.tsx`: creating mostra skeleton; copiar → feedback 2s (fake timers); expirado → clicar "gerar nova cobrança" → creating; erro → "tentar de novo" → creating
-- [ ] T021 [US1] Criar `packages/pixcheckout/src/index.ts` (superfície pública: provider, hook, 4 componentes, tipos) e conferir subpaths `pixcheckout/core` e `pixcheckout/server`; `npx tsc --noEmit` limpo no pacote
-- [ ] T022 [US1] Storybook: `packages/pixcheckout/src/react/PixCheckout.stories.tsx` com uma história por estado (dados falsos via client injetado, sem rede — SC-005) + uma história com `appearance` customizada (FR-015)
+- [X] T012 [US1] Criar `packages/pixcheckout/src/server/handler.ts`: `createWooviHandler({ appId, baseUrl?, beforeCreate? })` → `(Request) => Promise<Response>` com os 2 endpoints, formato de erro único, throw na inicialização sem appId, sem vazar detalhes da Woovi — contrato em contracts/server-handler.md
+- [X] T013 [P] [US1] Testes do handler em `packages/pixcheckout/src/server/handler.test.ts`: rota desconhecida → 404, `beforeCreate` substitui payload (fixa preço), appId ausente lança, corpo inválido → 400 `validation`, resposta de erro não contém o appId
+- [X] T014 [US1] Criar `packages/pixcheckout/src/react/theme.ts`: stylesheet única da biblioteca (classes `pixck-*`, CSS variables `--pixck-*` com defaults apresentáveis), `appearanceToVars(appearance)`, injeção idempotente da tag `<style>` (R7)
+- [X] T015 [US1] Criar `packages/pixcheckout/src/react/WooviProvider.tsx`: contexto com `endpoint` + `appearance` + client core criado a partir do endpoint (aceita client injetável para testes/histórias), injeta stylesheet, erro claro se hook/componente usado fora do provider
+- [X] T016 [US1] Criar `packages/pixcheckout/src/react/usePixCharge.ts`: correlationID preguiçoso por intenção (sobrevive StrictMode), criação com AbortController, polling com `setTimeout` encadeado usando `nextDelay`, pausa/checagem via `visibilitychange`, contador derivado de `expiresAt` com checagem final ao zerar, contador de falhas consecutivas, ações `retry`/`newCharge` (novo correlationID), `onPaid`/`onExpired` disparados uma única vez, cleanup total no desmonte — retorno conforme contracts/react-api.md
+- [X] T017 [US1] Testes do hook em `packages/pixcheckout/src/react/usePixCharge.test.tsx` (fake timers + client falso): montagem dupla StrictMode cria UMA cobrança; polling para após paid e após expired; zero chamadas/timers após desmonte; 3 falhas seguidas → error, sucesso no meio zera o contador; pago-vence-expirado na checagem final
+- [X] T018 [P] [US1] Criar subcomponentes: `packages/pixcheckout/src/react/PixQRCode.tsx` (SVG local via uqr a partir do brCode), `packages/pixcheckout/src/react/PixCopyButton.tsx` (clipboard + "copiado ✓" por 2s — FR-008), `packages/pixcheckout/src/react/PixStatus.tsx` (contador mm:ss + valor formatado)
+- [X] T019 [US1] Criar `packages/pixcheckout/src/react/PixCheckout.tsx`: compõe provider/hook/subcomponentes nas 5 interfaces de estado (skeleton no creating — FR-016; sucesso; expirado com botão nova cobrança; erro com retry), aplica appearance, props conforme contracts/react-api.md
+- [X] T020 [US1] Testes de comportamento em `packages/pixcheckout/src/react/PixCheckout.test.tsx`: creating mostra skeleton; copiar → feedback 2s (fake timers); expirado → clicar "gerar nova cobrança" → creating; erro → "tentar de novo" → creating
+- [X] T021 [US1] Criar `packages/pixcheckout/src/index.ts` (superfície pública: provider, hook, 4 componentes, tipos) e conferir subpaths `pixcheckout/core` e `pixcheckout/server`; `npx tsc --noEmit` limpo no pacote
+- [X] T022 [US1] Storybook: `packages/pixcheckout/src/react/PixCheckout.stories.tsx` com uma história por estado (dados falsos via client injetado, sem rede — SC-005) + uma história com `appearance` customizada (FR-015)
 
 **Checkpoint**: MVP pronto — biblioteca funciona, estados demonstráveis, decisão de segurança implementada.
 
@@ -67,9 +67,9 @@
 
 **Independent Test**: história/teste que renderiza os 5 estados como texto puro usando SÓ o hook; script Node consumindo só o core.
 
-- [ ] T023 [US2] Criar `packages/pixcheckout/src/react/Headless.stories.tsx`: os 5 estados renderizados como texto puro usando apenas `usePixCharge()` + client falso (nenhum componente visual da biblioteca importado) — é também o passo 4 do guia ("renderize cada estado como texto")
-- [ ] T024 [P] [US2] Reescrever `scripts/criar-cobranca.mjs` para importar `createCoreClient` de `pixcheckout/core` — prova FR-013 (core roda em Node puro) mantendo a saída atual
-- [ ] T025 [US2] Teste de integração headless em `packages/pixcheckout/src/react/headless.test.tsx`: componente de texto puro percorre creating → awaiting → paid só com o hook; asserção de que `pixcheckout` exporta `usePixCharge`, tipos e nada interno vaza
+- [X] T023 [US2] Criar `packages/pixcheckout/src/react/Headless.stories.tsx`: os 5 estados renderizados como texto puro usando apenas `usePixCharge()` + client falso (nenhum componente visual da biblioteca importado) — é também o passo 4 do guia ("renderize cada estado como texto")
+- [X] T024 [P] [US2] Reescrever `scripts/criar-cobranca.mjs` para importar `createCoreClient` de `pixcheckout/core` — prova FR-013 (core roda em Node puro) mantendo a saída atual
+- [X] T025 [US2] Teste de integração headless em `packages/pixcheckout/src/react/headless.test.tsx`: componente de texto puro percorre creating → awaiting → paid só com o hook; asserção de que `pixcheckout` exporta `usePixCharge`, tipos e nada interno vaza
 
 **Checkpoint**: Camadas 1 e 2 utilizáveis sozinhas, com prova executável.
 
@@ -81,9 +81,9 @@
 
 **Independent Test**: quickstart Cenário 2 (história mobile) — viewport < 640px mostra copia-e-cola antes do QR; cópia negada ainda permite pagar.
 
-- [ ] T026 [US3] CSS responsivo em `packages/pixcheckout/src/react/theme.ts`: media query < 640px inverte a ordem (copia-e-cola principal, QR secundário — FR-009), alvos de toque ≥44px, contador legível em tela pequena
-- [ ] T027 [US3] Fallback de clipboard em `packages/pixcheckout/src/react/PixCopyButton.tsx`: `navigator.clipboard` rejeitado → exibe o código completo selecionável com instrução de copiar manualmente (edge case da spec); teste do fallback em `PixCheckout.test.tsx`
-- [ ] T028 [P] [US3] História mobile em `packages/pixcheckout/src/react/PixCheckout.stories.tsx` (parâmetro viewport mobile) + teste da ordem do DOM na variante mobile
+- [X] T026 [US3] CSS responsivo em `packages/pixcheckout/src/react/theme.ts`: media query < 640px inverte a ordem (copia-e-cola principal, QR secundário — FR-009), alvos de toque ≥44px, contador legível em tela pequena
+- [X] T027 [US3] Fallback de clipboard em `packages/pixcheckout/src/react/PixCopyButton.tsx`: `navigator.clipboard` rejeitado → exibe o código completo selecionável com instrução de copiar manualmente (edge case da spec); teste do fallback em `PixCheckout.test.tsx`
+- [X] T028 [P] [US3] História mobile em `packages/pixcheckout/src/react/PixCheckout.stories.tsx` (parâmetro viewport mobile) + teste da ordem do DOM na variante mobile
 
 **Checkpoint**: Experiência do comprador completa nos dois formatos de tela.
 

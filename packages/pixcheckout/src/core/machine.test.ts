@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { transition } from './machine';
-import type { Charge, CheckoutEvent, CheckoutState } from './types';
-import { PixApiError } from './types';
+import { transition } from './machine.ts';
+import type { Charge, CheckoutEvent, CheckoutState } from './types.ts';
+import { PixApiError } from './types.ts';
 
 const charge: Charge = {
   correlationID: 'abc-123',

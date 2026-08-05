@@ -1,4 +1,4 @@
-import type { CheckoutEvent, CheckoutState } from './types';
+import type { CheckoutEvent, CheckoutState } from './types.ts';
 
 /**
  * A maquina de estados do checkout como funcao pura: dado o estado atual e um

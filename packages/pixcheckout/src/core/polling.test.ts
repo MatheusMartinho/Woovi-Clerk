@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { FAST_POLL_MS, FAST_WINDOW_MS, nextDelay, SLOW_POLL_MS } from './polling';
+import { FAST_POLL_MS, FAST_WINDOW_MS, nextDelay, SLOW_POLL_MS } from './polling.ts';
 
 describe('nextDelay — 3s na janela rápida, 10s depois', () => {
   it('começa rápido', () => {
