@@ -74,10 +74,37 @@ Cada decisão abaixo é uma resposta de entrevista em potencial. O formato é se
 - **Rationale**: Centralizar textos custa zero e deixa i18n futura como troca de objeto; `Intl` é o padrão da plataforma para dinheiro (nunca concatenar "R$" na mão).
 - **Alternatives considered**: i18next — infraestrutura para um requisito que não existe nesta entrega.
 
-## Pendências de verificação no sandbox (não bloqueiam design)
+## R12. Verificação contra o sandbox real (T011 — executada em 2026-08-05)
 
-| Item | Onde verificar | Impacto se diferente do assumido |
-|---|---|---|
-| Comportamento de POST /charge com `correlationID` repetido (idempotente vs erro) | `npm run cobranca` duas vezes com o mesmo ID | Nenhum — R9 tolera ambos |
-| Campo de expiração retornado (`expiresIn` segundos vs `expiresDate`) | Saída do script do passo 2 | Ajuste de parsing no core, 5 linhas |
-| Forma de simular pagamento no sandbox (botão no dashboard / paymentLinkUrl) | Painel do sandbox com uma cobrança ativa | Só afeta o roteiro do vídeo e do quickstart |
+As três pendências foram resolvidas rodando `npm run cobranca` contra a API de verdade. **Duas viraram correção de código** — e são as descobertas mais valiosas da execução, porque nenhuma apareceria em teste com dados falsos.
+
+### Achado 1 · POST repetido não é idempotente, e não responde 409
+
+A Woovi responde **HTTP 400** com `{"error":"Já existe uma cobrança com este Correlação ID"}` — mensagem **em português**. O detector de duplicidade do R9 procurava a palavra inglesa `correlation`, que não casa com `Correlação`, então o fallback nunca disparava e o erro subia cru.
+
+**Correção**: o teste passou a casar o prefixo `correla` (pega `correlation`, `correlação`, `correlacao`) e a aceitar 400 além de 409. Verificado depois contra a API: a segunda chamada com o mesmo `correlationID` devolve a **mesma** cobrança (`brCode` idêntico, contador já decrescido). Coberto por teste com a mensagem real.
+
+### Achado 2 · `expiresIn` é o TTL fixo, não o tempo restante
+
+O nome engana. Numa cobrança criada 5 minutos antes, a API ainda devolve `expiresIn: 86400`, enquanto `expiresDate` mostra o instante correto (restante real: 86098s). Usar `expiresIn` como contador faria o tempo **reiniciar do zero a cada refresh** ou remontagem — um bug que só aparece em cobrança recuperada, nunca em cobrança recém-criada, e por isso escaparia de todo teste feito com dados de criação.
+
+**Correção**: ordem de resolução passou a ser `remainingSeconds` (campo nosso) → `expiresDate` → `expiresAt` → `expiresIn` (último recurso, só válido no instante da criação).
+
+### Decisão derivada · de quem é o relógio
+
+O achado 2 forçou a pergunta certa. A resposta ficou em duas partes:
+
+- **O contador é do navegador.** O handler emite `remainingSeconds` (quanto falta, medido no servidor) e o navegador ancora no próprio relógio. Enviar o instante absoluto do servidor faria o contador errar exatamente o tanto que o relógio do visitante estiver desregulado — e desvio de minutos num desktop é bem mais comum que os ~200ms de latência que o valor relativo custa. O nome é `remainingSeconds`, não `expiresIn`, justamente para não colidir com a semântica diferente do campo homônimo da Woovi.
+- **A expiração é do servidor.** Quando o contador zera, a checagem final só aceita `EXPIRED` vindo da API. Se o servidor ainda disser `ACTIVE`, o checkout **continua aguardando**: o QR ainda é pagável, e esconder uma cobrança válida porque o relógio local adiantou seria perder dinheiro do lojista. Falha de rede nessa checagem também não expira nada — o polling em curso, com seu próprio contador de falhas, decide.
+
+### Achado 3 · como simular pagamento
+
+A resposta traz `paymentLinkUrl` (`https://woovi-sandbox.com/pay/{id}`) — é por ali que se paga a cobrança de teste. Usado no roteiro do vídeo e no Cenário 3 do quickstart.
+
+### Confirmações sem impacto
+
+Campos da resposta: `brCode`, `qrCodeImage`, `status` (`ACTIVE`), `value` (centavos), `correlationID`, `paymentLinkUrl`, `expiresDate`, `expiresIn`, `createdAt`, `paymentMethods`, `fee`, `discount` e outros — o core lê só o subconjunto do contrato. TTL padrão do sandbox: 86400s (24h). Autenticação: `Authorization: {AppID}` sem `Bearer`, como documentado.
+
+### Escopos da chave (menor privilégio)
+
+O painel permite escopar a chave por operação. A do projeto marca **apenas `CHARGE_POST` e `CHARGE_GET`**. Ficam de fora `CHARGE_GET_LIST` (exporia o faturamento da loja), `CHARGE_DELETE`/`CHARGE_PATCH` (destrutivos; expiração gera cobrança nova em vez de editar), `CHARGE_REFUND_*` (dinheiro saindo) e `CHARGE_IMAGE_GET`/`CHARGE_BRCODE_IMAGE_GET` (desnecessários — o QR é gerado no cliente, R6). Isso reforça a proposta de chave publicável: o mecanismo que define "operação inofensiva" **já existe**; falta só permitir restrição por domínio de origem.

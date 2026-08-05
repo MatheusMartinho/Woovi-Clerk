@@ -125,6 +125,16 @@ qualquer ──► error ──► (tentar de novo) ──► creating
 
 Regra de ouro: **pago vence expirado**. Quando o contador zera, uma checagem final roda antes de declarar expirado — dinheiro recebido nunca fica escondido.
 
+### De quem é o relógio
+
+O contador é do navegador; a expiração é do servidor.
+
+O handler manda quanto **falta** (`remainingSeconds`) e o navegador ancora no próprio relógio — mandar o instante absoluto do servidor faria o contador errar exatamente o tanto que o relógio do visitante estivesse desregulado, e desvio de minutos num desktop é bem mais comum que os 200ms de latência que o valor relativo custa.
+
+Mas quem decide se expirou é a Woovi. Se o contador zerar e a API ainda responder `ACTIVE`, o checkout **continua aguardando**: o QR ainda é pagável, e escondê-lo por causa de um relógio adiantado seria perder uma venda.
+
+> Isso não é teoria: o campo `expiresIn` da Woovi parece um contador, mas é o **TTL fixo** da cobrança — numa cobrança criada há horas ele ainda diz `86400`. Usá-lo direto faria o tempo reiniciar a cada refresh. Só descobrimos testando a recuperação de uma cobrança existente, não a criação de uma nova. Está documentado em [research.md § R12](specs/001-pixcheckout-library/research.md).
+
 ### Como o componente sabe que pagou (sem webhook no navegador)
 
 Webhook é servidor→servidor; um componente React não recebe webhook. Então o hook consulta o status:

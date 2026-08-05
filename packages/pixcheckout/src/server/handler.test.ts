@@ -53,7 +53,10 @@ describe('createWooviHandler', () => {
     expect(res.status).toBe(200);
     const { charge } = await res.json();
     expect(charge.brCode).toBe(WOOVI_CHARGE.charge.brCode);
-    expect(typeof charge.expiresAt).toBe('number'); // normalizada: instante absoluto
+    // Vai pelo fio como tempo RESTANTE, para o navegador ancorar no próprio
+    // relógio — e com nome próprio, já que `expiresIn` da Woovi é o TTL fixo.
+    expect(charge.remainingSeconds).toBeGreaterThan(0);
+    expect(charge.remainingSeconds).toBeLessThanOrEqual(900);
 
     const [url, init] = fetchStub.mock.calls[0]!;
     expect(String(url)).toBe('https://api.woovi-sandbox.com/api/v1/charge');

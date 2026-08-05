@@ -1,6 +1,6 @@
-import { createCoreClient } from '../core/client';
-import { PixApiError, PixValidationError } from '../core/types';
-import type { CreateChargePayload } from '../core/types';
+import { createCoreClient } from '../core/client.ts';
+import { PixApiError, PixValidationError } from '../core/types.ts';
+import type { Charge, CreateChargePayload } from '../core/types.ts';
 
 export interface WooviHandlerConfig {
   /** AppID da Woovi. SEMPRE de variável de ambiente — nunca um literal no código. */
@@ -51,7 +51,7 @@ export function createWooviHandler(config: WooviHandlerConfig): (req: Request) =
       const statusMatch = pathname.match(/\/charge\/([^/]+)$/);
       if (req.method === 'GET' && statusMatch) {
         const charge = await woovi.getCharge(decodeURIComponent(statusMatch[1]!));
-        return json({ charge }, 200);
+        return json({ charge: toWire(charge) }, 200);
       }
 
       if (req.method === 'POST' && /\/charge$/.test(pathname)) {
@@ -73,13 +73,30 @@ export function createWooviHandler(config: WooviHandlerConfig): (req: Request) =
         }
 
         const charge = await woovi.createCharge(payload);
-        return json({ charge }, 200);
+        return json({ charge: toWire(charge) }, 200);
       }
 
       return json({ error: { code: 'not_found', message: 'Rota não suportada.' } }, 404);
     } catch (err) {
       return errorResponse(err);
     }
+  };
+}
+
+/**
+ * Manda a expiração pelo fio como valor RELATIVO. O servidor sabe quanto falta;
+ * quem transforma isso em instante é o navegador, usando o próprio relógio —
+ * assim o contador não erra junto com um relógio desregulado.
+ *
+ * O nome é `remainingSeconds`, e não `expiresIn`, de propósito: `expiresIn` já
+ * existe na resposta da Woovi significando OUTRA coisa (o TTL fixo da cobrança,
+ * que não diminui com o tempo). Reaproveitar o nome com semântica diferente
+ * seria a próxima pessoa lendo isto tomando a decisão errada.
+ */
+function toWire(charge: Charge): Charge & { remainingSeconds: number } {
+  return {
+    ...charge,
+    remainingSeconds: Math.max(0, Math.round((charge.expiresAt - Date.now()) / 1000)),
   };
 }
 

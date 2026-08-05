@@ -227,7 +227,7 @@ describe('usePixCharge — expiração local e "pago vence expirado"', () => {
     expect(onExpired).not.toHaveBeenCalled();
   });
 
-  it('contador zera sem pagamento → expired e newCharge inicia nova intenção', async () => {
+  it('contador zera e o servidor confirma → expired; newCharge inicia nova intenção', async () => {
     const fake = makeFakeClient();
     fake.setExpiresInMs(5_000);
     const { result } = renderHook(() => usePixCharge({ amount: 5000 }), {
@@ -235,6 +235,7 @@ describe('usePixCharge — expiração local e "pago vence expirado"', () => {
     });
     await flush();
 
+    fake.setStatus('EXPIRED'); // a Woovi marca como expirada
     await advance(5_100);
     await flush();
     expect(result.current.state.status).toBe('expired');
@@ -248,6 +249,28 @@ describe('usePixCharge — expiração local e "pago vence expirado"', () => {
     expect(result.current.state.status).toBe('awaiting_payment');
     expect(fake.created.length).toBe(2);
     expect(fake.created[0]!.correlationID).not.toBe(fake.created[1]!.correlationID);
+  });
+
+  it('contador zera mas o servidor ainda diz ACTIVE → NÃO expira (relógio local não manda)', async () => {
+    const fake = makeFakeClient();
+    fake.setExpiresInMs(5_000); // como se o relógio do visitante adiantasse
+    const onExpired = vi.fn();
+    const { result } = renderHook(() => usePixCharge({ amount: 5000, onExpired }), {
+      wrapper: wrapper(fake.client),
+    });
+    await flush();
+
+    await advance(5_100); // contador zerou; a API continua respondendo ACTIVE
+    await flush();
+
+    // O QR ainda é válido: esconder a cobrança aqui seria perder um pagamento.
+    expect(result.current.state.status).toBe('awaiting_payment');
+    expect(onExpired).not.toHaveBeenCalled();
+
+    // ...e quando o servidor finalmente marca, o polling normal traz a verdade.
+    fake.setStatus('EXPIRED');
+    await advance(10_000);
+    expect(result.current.state.status).toBe('expired');
   });
 });
 

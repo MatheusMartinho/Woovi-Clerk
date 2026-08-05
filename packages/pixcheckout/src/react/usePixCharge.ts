@@ -169,8 +169,12 @@ export function usePixCharge(options: UsePixChargeOptions): UsePixChargeResult {
   const remainingMs =
     state.status === 'awaiting_payment' ? Math.max(0, state.charge.expiresAt - now) : 0;
 
-  // ── 4. Contador zerou: checagem FINAL antes de declarar expirado ─────────
-  // Pago vence expirado: se essa última consulta revelar pagamento, é pago.
+  // ── 4. Contador zerou: checagem FINAL — mas quem decide é o servidor ─────
+  // O contador é do navegador; a expiração é da Woovi. Se o relógio local
+  // disser "acabou" e a API disser ACTIVE, a cobrança AINDA É PAGÁVEL — seria
+  // um erro caro esconder um QR válido porque o relógio do visitante adianta.
+  // Então: pago → pago, expirado → expirado, ainda ativo → segue aguardando e
+  // deixa o polling normal trazer a palavra final.
   const zeroed = state.status === 'awaiting_payment' && remainingMs <= 0;
   useEffect(() => {
     if (!zeroed) return;
@@ -183,10 +187,11 @@ export function usePixCharge(options: UsePixChargeOptions): UsePixChargeResult {
       .then((fresh) => {
         if (cancelled) return;
         if (fresh.status === 'COMPLETED') dispatch({ type: 'STATUS_PAID', charge: fresh });
-        else dispatch({ type: 'STATUS_EXPIRED' });
+        else if (fresh.status === 'EXPIRED') dispatch({ type: 'STATUS_EXPIRED' });
       })
-      .catch((err: unknown) => {
-        if (!cancelled && !isAbort(err)) dispatch({ type: 'STATUS_EXPIRED' });
+      .catch(() => {
+        // Falha de rede não expira nada: o polling em curso decide, e ele já
+        // tem contador de falhas próprio para virar estado de erro.
       });
     return () => {
       cancelled = true;

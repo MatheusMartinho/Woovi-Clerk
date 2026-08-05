@@ -33,7 +33,7 @@
 - [X] T008 [P] Criar `packages/pixcheckout/src/core/polling.ts`: `nextDelay(elapsedMs)` (3_000 até 120_000ms, depois 10_000) e constante `MAX_CONSECUTIVE_FAILURES = 3` (R5)
 - [X] T009 [P] Criar `packages/pixcheckout/src/i18n/texts.ts`: objeto único com todos os textos pt-BR (FR-022) + `formatBRL(cents)` via `Intl.NumberFormat` + `formatCountdown(ms)` → `mm:ss`
 - [X] T010 [P] Testes das funções puras: `packages/pixcheckout/src/core/machine.test.ts` (todas as células da tabela de transições) e `packages/pixcheckout/src/core/polling.test.ts` (fronteira 3s→10s aos 2min)
-- [ ] T011 Verificação no sandbox (quickstart Cenário 0): rodar `npm run cobranca` duas vezes com o mesmo correlationID; registrar em research.md as respostas das 3 pendências ⚠ (idempotência do POST, campo de expiração real, como simular pagamento); ajustar normalização em `src/core/client.ts` se necessário. *Pré-condição: AppID no `.env`*
+- [X] T011 Verificação no sandbox (quickstart Cenário 0): rodar `npm run cobranca` duas vezes com o mesmo correlationID; registrar em research.md as respostas das 3 pendências ⚠ (idempotência do POST, campo de expiração real, como simular pagamento); ajustar normalização em `src/core/client.ts` se necessário. *Pré-condição: AppID no `.env`*
 
 **Checkpoint**: Core provado contra a API real; máquina 100% testada sem React.
 

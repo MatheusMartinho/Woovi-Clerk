@@ -81,10 +81,18 @@ export function createCoreClient(baseUrl: string, options: CoreClientOptions = {
   };
 }
 
+/**
+ * Verificado contra o sandbox em 2026-08-05: a Woovi NAO e idempotente no POST.
+ * Ela responde 400 com {"error":"Ja existe uma cobranca com este Correlacao ID"}
+ * — em portugues, e nao 409 como a intuicao sugere. Por isso o teste casa o
+ * prefixo "correla" (pega correlation/correlacao/correlação) e nao a palavra
+ * inteira em ingles, e aceita 400 alem de 409.
+ */
 function isDuplicateCorrelationError(err: unknown): boolean {
   if (!(err instanceof PixApiError)) return false;
   if (err.status === 409) return true;
-  return /correlation/i.test(err.message) && /(exist|usad|used|duplicad)/i.test(err.message);
+  const message = err.message.toLowerCase();
+  return /correla/.test(message) && /(exist|já existe|usad|used|duplicad|already)/.test(message);
 }
 
 const STATUS_MAP: Record<string, ChargeStatus> = {
@@ -119,17 +127,31 @@ export function normalizeCharge(raw: unknown): Charge {
 }
 
 /**
- * Woovi pode informar a expiracao como expiresIn (segundos a partir de agora)
- * e/ou expiresDate (ISO). Ja normalizado (expiresAt) tambem e aceito, porque o
- * handler devolve a cobranca ja convertida. Sem nenhum dos tres: 15 min, o
- * padrao da plataforma.
+ * De quem e o relogio?
+ *
+ * ARMADILHA verificada no sandbox em 2026-08-05: o campo `expiresIn` da Woovi
+ * NAO e o tempo restante — e o TTL fixo da cobranca. Numa cobranca criada ha
+ * 5 minutos ele continua dizendo 86400. Usa-lo como contador faria o tempo
+ * reiniciar a cada refresh da pagina. Por isso ele e o ULTIMO recurso, so
+ * aproveitavel no instante da criacao.
+ *
+ * `remainingSeconds` e campo NOSSO, emitido pelo handler: quanto falta de
+ * verdade, medido no servidor. E relativo de proposito, para o navegador
+ * ancora-lo no PROPRIO relogio — um instante absoluto do servidor erraria
+ * exatamente o tanto que o relogio do visitante estiver desregulado, e desvio
+ * de minutos num desktop e bem mais comum que os ~200ms de latencia que o
+ * valor relativo custa.
+ *
+ * Tudo isso vale so para o CONTADOR na tela. Quem decide se expirou de verdade
+ * e o servidor (ver a checagem final em usePixCharge).
  */
 function resolveExpiresAt(data: Record<string, unknown>): number {
-  if (typeof data.expiresAt === 'number') return data.expiresAt;
+  if (typeof data.remainingSeconds === 'number') return Date.now() + data.remainingSeconds * 1000;
   if (typeof data.expiresDate === 'string') {
     const parsed = Date.parse(data.expiresDate);
     if (!Number.isNaN(parsed)) return parsed;
   }
+  if (typeof data.expiresAt === 'number') return data.expiresAt;
   if (typeof data.expiresIn === 'number') return Date.now() + data.expiresIn * 1000;
   return Date.now() + 15 * 60 * 1000;
 }

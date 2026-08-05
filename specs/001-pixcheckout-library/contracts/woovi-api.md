@@ -32,8 +32,10 @@ Response `200` (campos que o core lê — resto ignorado):
 }
 ```
 
-⚠ Verificar: `expiresIn` (segundos) vs `expiresDate` (ISO) — o core normaliza qualquer um para `expiresAt` epoch ms.
-⚠ Verificar: POST repetido com mesmo `correlationID` — idempotente (devolve a mesma) ou erro; o client tolera ambos (R9).
+✅ **Verificado no sandbox (2026-08-05)** — as duas pendências viraram correção de código, detalhes em [research.md § R12](../research.md):
+
+- **`expiresIn` é o TTL FIXO da cobrança, não o tempo restante.** Numa cobrança criada há 5 min ele ainda diz `86400`, enquanto `expiresDate` traz a verdade. O core usa `expiresDate`; `expiresIn` é último recurso.
+- **POST repetido não é idempotente e não devolve 409.** Responde **400** com `{"error":"Já existe uma cobrança com este Correlação ID"}` (em português). O client detecta pelo prefixo `correla` e cai no GET, recuperando a mesma cobrança.
 
 ## `GET /api/v1/charge/{correlationID}`
 
