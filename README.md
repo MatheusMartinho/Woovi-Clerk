@@ -68,9 +68,20 @@ const handler = createWooviHandler({
 });
 ```
 
+### Menor privilégio: a chave usa 2 escopos, não 9
+
+A Woovi permite escopar a chave por operação. A do PixCheckout marca exatamente dois:
+
+- `CHARGE_POST` — criar uma cobrança
+- `CHARGE_GET` — obter uma cobrança
+
+Todo o resto fica de fora, de propósito. `CHARGE_GET_LIST` exporia o faturamento inteiro da loja se a chave vazasse; `CHARGE_DELETE` e `CHARGE_PATCH` são destrutivos e o checkout nunca precisa deles (ao expirar, ele gera cobrança nova em vez de editar); `CHARGE_REFUND_*` mexe com dinheiro saindo. E os escopos de imagem — `CHARGE_IMAGE_GET`, `CHARGE_BRCODE_IMAGE_GET` — são desnecessários porque o QR é **gerado no cliente** a partir do `brCode`, sem round-trip.
+
 ### Proposta para a Woovi: chave publicável
 
-O Stripe resolve isso com dois tipos de chave: a *publishable* (pode ir ao navegador; só faz operações inofensivas) e a *secret* (fica no servidor). Se a Woovi emitisse uma chave publicável — escopo: criar cobrança e ler status, nada de saque/estorno/listagem —, o handler se tornaria opcional e o setup cairia para isto:
+O Stripe resolve isso com dois tipos de chave: a *publishable* (pode ir ao navegador; só faz operações inofensivas) e a *secret* (fica no servidor). A boa notícia é que **metade do caminho já existe**: o mecanismo de escopos é justamente o que define "operação inofensiva".
+
+Uma chave restrita a `CHARGE_POST` + `CHARGE_GET`, com origem limitada por domínio, já seria segura no navegador — o pior que um atacante faria é criar cobranças **para a própria loja**. Com ela, o handler viraria opcional e o setup cairia para isto:
 
 ```tsx
 // API hipotética, se pk_ existisse:
@@ -79,7 +90,7 @@ O Stripe resolve isso com dois tipos de chave: a *publishable* (pode ir ao naveg
 </WooviProvider>
 ```
 
-Até lá, o handler pronto mantém o setup em cinco minutos sem abrir mão da segurança. (Mesmo com pk, o `beforeCreate` continuaria valendo para preço — são problemas diferentes.)
+Até lá, o handler pronto mantém o setup em cinco minutos sem abrir mão da segurança. (Mesmo com `pk_`, o `beforeCreate` continuaria valendo para preço — roubo de credencial e adulteração de valor são problemas diferentes, e só o servidor resolve o segundo.)
 
 ---
 

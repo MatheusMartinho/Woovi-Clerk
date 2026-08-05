@@ -49,6 +49,10 @@ export { handler as GET, handler as POST };
 3. `beforeCreate` é o ponto de integridade de preço; o README mostra o exemplo acima e explica o ataque que ele previne.
 4. Same-origin por padrão (sem headers CORS); README documenta como liberar outra origem conscientemente.
 
+## Escopos da chave (verificado no painel em 2026-08-05)
+
+A chave criada para este projeto marca **apenas** `CHARGE_POST` e `CHARGE_GET` — as duas únicas operações que o core executa. Ficam de fora: `CHARGE_GET_LIST` (exporia o faturamento da loja), `CHARGE_DELETE`/`CHARGE_PATCH` (destrutivos; expiração gera cobrança nova em vez de editar), `CHARGE_REFUND_GET_LIST`/`CHARGE_REFUND_POST` (dinheiro saindo) e `CHARGE_IMAGE_GET`/`CHARGE_BRCODE_IMAGE_GET` (desnecessários: o QR é gerado no cliente a partir do `brCode` — R6).
+
 ## Proposta "publishable key" (compromisso do FR-014, vai no README)
 
-Seção do README endereçada à Woovi: se existisse uma chave **publicável** (só cria cobrança e lê status, sem saque/estorno/listagem), o handler se tornaria opcional e o provider aceitaria `publishableKey="pk_..."` — mostrando lado a lado a API atual e a API hipotética. Referência: modelo publishable/secret do Stripe.
+Seção do README endereçada à Woovi: o mecanismo de escopos acima **já define** o que seria uma operação inofensiva. Uma chave restrita a `CHARGE_POST` + `CHARGE_GET` e limitada por domínio de origem seria segura no navegador — o pior abuso possível é criar cobranças para a própria loja. Com ela o handler viraria opcional e o provider aceitaria `publishableKey="pk_..."`; o README mostra a API atual e a hipotética lado a lado. Referência: modelo publishable/secret do Stripe.
