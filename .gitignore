@@ -1,0 +1,12 @@
+.env
+.env.local
+.env*.local
+node_modules/
+dist/
+build/
+.next/
+storybook-static/
+coverage/
+*.log
+.DS_Store
+.vercel/

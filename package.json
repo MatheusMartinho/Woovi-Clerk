@@ -1,0 +1,18 @@
+{
+  "name": "cinco-linhas",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "PixCheckout: checkout Pix completo em cinco linhas de React.",
+  "workspaces": [
+    "packages/*",
+    "examples/*"
+  ],
+  "scripts": {
+    "cobranca": "node scripts/criar-cobranca.mjs",
+    "test": "npm run test -w packages/pixcheckout",
+    "typecheck": "npm run typecheck -w packages/pixcheckout",
+    "storybook": "npm run storybook -w packages/pixcheckout",
+    "dev": "npm run dev -w examples/loja"
+  }
+}
