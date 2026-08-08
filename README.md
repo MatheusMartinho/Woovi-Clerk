@@ -10,7 +10,7 @@
 
 O que essas linhas entregam sem você escrever nada: criação da cobrança, QR code, botão copia-e-cola com feedback, contador de expiração, confirmação de pagamento em tempo quase real, tela de expirado com nova cobrança, estados de erro com retry — e a chave da API **nunca** aparece no navegador.
 
-🛒 **Demo ao vivo**: _[link da Vercel — publicar com `vercel deploy`]_ · 🎬 **Vídeo de 2 min**: _[link]_
+🛒 **Demo ao vivo**: [loja-omega-livid.vercel.app](https://loja-omega-livid.vercel.app) — compre um café com Pix de mentira · 🎬 **Vídeo de 2 min**: _[link]_
 
 ---
 
