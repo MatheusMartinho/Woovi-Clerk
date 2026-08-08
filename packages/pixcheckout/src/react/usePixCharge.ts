@@ -14,6 +14,11 @@ export interface UsePixChargeOptions {
   /** Centavos, inteiro. 5000 = R$ 50,00. */
   amount: number;
   comment?: string;
+  /**
+   * Disparado UMA vez por intenção quando a cobrança fica pronta — é aqui que
+   * a loja amarra o correlationID ao pedido dela (conciliação).
+   */
+  onChargeCreated?: (charge: Charge) => void;
   /** Disparado UMA vez quando o pagamento confirma. */
   onPaid?: (charge: Charge) => void;
   /** Disparado UMA vez quando a cobrança expira. */
@@ -60,7 +65,7 @@ export function usePixCharge(options: UsePixChargeOptions): UsePixChargeResult {
   stateRef.current = state;
   const optionsRef = useRef(options);
   optionsRef.current = options;
-  const firedRef = useRef({ paid: false, expired: false });
+  const firedRef = useRef({ created: false, paid: false, expired: false });
 
   // ── 1. Criação: um POST por intenção, abortável ──────────────────────────
   useEffect(() => {
@@ -200,6 +205,10 @@ export function usePixCharge(options: UsePixChargeOptions): UsePixChargeResult {
 
   // ── 5. Callbacks disparados exatamente uma vez por intenção ──────────────
   useEffect(() => {
+    if (state.status === 'awaiting_payment' && !firedRef.current.created) {
+      firedRef.current.created = true;
+      optionsRef.current.onChargeCreated?.(state.charge);
+    }
     if (state.status === 'paid' && !firedRef.current.paid) {
       firedRef.current.paid = true;
       optionsRef.current.onPaid?.(state.charge);
@@ -211,7 +220,7 @@ export function usePixCharge(options: UsePixChargeOptions): UsePixChargeResult {
   }, [state]);
 
   const startNewIntent = useCallback(() => {
-    firedRef.current = { paid: false, expired: false };
+    firedRef.current = { created: false, paid: false, expired: false };
     setNow(Date.now());
     setIntentId(createCorrelationID());
   }, []);

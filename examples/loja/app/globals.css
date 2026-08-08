@@ -80,6 +80,42 @@ body {
   font-size: 14px;
 }
 
+.sandbox-painel {
+  margin-top: 20px;
+  padding: 16px 20px;
+  border: 1.5px dashed #c4b5fd;
+  background: #f5f3ff;
+  border-radius: 14px;
+  font-size: 14px;
+  color: #4c1d95;
+  line-height: 1.5;
+}
+
+.sandbox-painel p {
+  margin: 0 0 12px;
+}
+
+.sandbox-painel button {
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  border: 0;
+  border-radius: 10px;
+  padding: 12px 20px;
+  background: #7c3aed;
+  color: #ffffff;
+  transition: filter 0.15s;
+}
+
+.sandbox-painel button:hover {
+  filter: brightness(1.08);
+}
+
+.sandbox-painel button:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
 .obrigado {
   text-align: center;
   padding-top: 80px;

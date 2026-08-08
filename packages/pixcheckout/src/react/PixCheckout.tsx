@@ -15,6 +15,8 @@ export interface PixCheckoutProps {
   /** Centavos, inteiro. 5000 = R$ 50,00. */
   amount: number;
   comment?: string;
+  /** Uma vez por intenção, quando a cobrança fica pronta (conciliação com o pedido). */
+  onChargeCreated?: (charge: Charge) => void;
   onPaid?: (charge: Charge) => void;
   onExpired?: (charge: Charge) => void;
   className?: string;

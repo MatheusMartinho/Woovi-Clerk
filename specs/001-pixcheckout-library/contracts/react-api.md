@@ -25,6 +25,7 @@ Comportamento: injeta a stylesheet da biblioteca uma única vez; fornece context
 | Prop | Tipo | Obrigatória | Descrição |
 |---|---|---|---|
 | `amount` | `number` | sim | Centavos, inteiro > 0. `5000` = R$ 50,00 |
+| `onChargeCreated` | `(charge: Charge) => void` | não | **Uma vez por intenção**, quando a cobrança fica pronta — para a loja amarrar o `correlationID` ao pedido (conciliação) |
 | `onPaid` | `(charge: Charge) => void` | não | Disparado **uma única vez** na confirmação |
 | `onExpired` | `(charge: Charge) => void` | não | Disparado quando expira |
 | `comment` | `string` | não | Descrição repassada à cobrança |

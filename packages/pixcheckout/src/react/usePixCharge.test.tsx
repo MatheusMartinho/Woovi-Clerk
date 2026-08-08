@@ -97,6 +97,21 @@ describe('usePixCharge — criação', () => {
     expect(ids.size).toBe(1); // FR-020: mesma intenção, mesma cobrança
   });
 
+  it('onChargeCreated dispara UMA vez por intenção, com a cobrança pronta', async () => {
+    const fake = makeFakeClient();
+    const onChargeCreated = vi.fn();
+    renderHook(() => usePixCharge({ amount: 5000, onChargeCreated }), {
+      wrapper: wrapper(fake.client),
+    });
+
+    await flush();
+    await advance(3_000); // polls extras não redisparam o callback
+    await advance(3_000);
+
+    expect(onChargeCreated).toHaveBeenCalledTimes(1);
+    expect(onChargeCreated.mock.calls[0]![0].correlationID).toBe(fake.created[0]!.correlationID);
+  });
+
   it('falha na criação → error(create_failed); retry cria NOVA intenção', async () => {
     const fake = makeFakeClient();
     (fake.client.createCharge as ReturnType<typeof vi.fn>)

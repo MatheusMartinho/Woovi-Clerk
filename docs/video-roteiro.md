@@ -28,8 +28,8 @@ Navegador em `localhost:3000` → clicar **Comprar com Pix**:
 
 (Estreitar a janela pra mostrar a inversão mobile. Clicar em copiar → "Copiado ✓".)
 
-Abrir o painel do sandbox → achar a cobrança → **pagar/simular pagamento**.
-Voltar pra loja SEM tocar em nada:
+Clicar no botão **"✨ Simular pagamento"** do painel roxo de demonstração
+(abaixo do checkout) e NÃO tocar em mais nada:
 > "Sem refresh: o componente consulta o status — 3 segundos nos primeiros minutos, com pausa quando a aba está oculta — e…"
 
 Tela vira "Pagamento confirmado" e navega para /obrigado:
