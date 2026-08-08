@@ -67,6 +67,12 @@ export const stylesheet = `
 .pixck-copyarea { grid-area: copy; display: flex; flex-direction: column; gap: 12px; }
 .pixck-qrarea { grid-area: qr; display: flex; justify-content: center; }
 
+.pixck-instructions { margin: 0; font-size: 14px; line-height: 1.5; color: #374151; }
+/* instrucao certa para cada contexto: sem camera apontavel no celular.
+   Estas regras-base precisam vir ANTES do @container abaixo — mesma
+   especificidade, e em CSS o empate e decidido pela ordem no arquivo. */
+.pixck-instructions--wide { display: none; }
+
 @container (min-width: 560px) {
   .pixck-body {
     grid-template-areas: 'qr copy';
@@ -77,9 +83,6 @@ export const stylesheet = `
   .pixck-instructions--mobile { display: none; }
 }
 
-.pixck-instructions { margin: 0; font-size: 14px; line-height: 1.5; color: #374151; }
-/* instrucao certa para cada contexto: sem camera apontavel no celular */
-.pixck-instructions--wide { display: none; }
 
 .pixck-btn {
   font: inherit;
