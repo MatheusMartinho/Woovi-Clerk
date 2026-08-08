@@ -1,6 +1,7 @@
 'use client';
 
 import { formatCountdown, texts } from '../i18n/texts';
+import { cx } from './theme';
 
 export interface PixStatusProps {
   remainingMs: number;
@@ -14,7 +15,7 @@ export function PixStatus({ remainingMs, className }: PixStatusProps) {
     <span
       role="timer"
       aria-label={`${texts.expiresIn} ${countdown}`}
-      className={className ? `pixck-countdown ${className}` : 'pixck-countdown'}
+      className={cx('pixck-countdown', className)}
     >
       {texts.expiresIn} <strong>{countdown}</strong>
     </span>

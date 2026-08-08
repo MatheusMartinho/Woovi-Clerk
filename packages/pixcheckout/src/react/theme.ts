@@ -73,9 +73,13 @@ export const stylesheet = `
     grid-template-columns: auto 1fr;
     align-items: center;
   }
+  .pixck-instructions--wide { display: block; }
+  .pixck-instructions--mobile { display: none; }
 }
 
 .pixck-instructions { margin: 0; font-size: 14px; line-height: 1.5; color: #374151; }
+/* instrucao certa para cada contexto: sem camera apontavel no celular */
+.pixck-instructions--wide { display: none; }
 
 .pixck-btn {
   font: inherit;
@@ -156,6 +160,11 @@ export function injectStyles(): void {
   el.id = STYLE_ID;
   el.textContent = stylesheet;
   document.head.appendChild(el);
+}
+
+/** Junta a classe base da biblioteca com a classe opcional do integrador. */
+export function cx(base: string, className?: string): string {
+  return className ? `${base} ${className}` : base;
 }
 
 export function appearanceToVars(appearance?: Appearance): CSSProperties {

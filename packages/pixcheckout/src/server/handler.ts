@@ -1,4 +1,4 @@
-import { createCoreClient } from '../core/client.ts';
+import { createCoreClient, trimTrailingSlash } from '../core/client.ts';
 import { PixApiError, PixValidationError } from '../core/types.ts';
 import type { Charge, CreateChargePayload } from '../core/types.ts';
 
@@ -39,7 +39,7 @@ export function createWooviHandler(config: WooviHandlerConfig): (req: Request) =
     );
   }
 
-  const base = (config.baseUrl ?? DEFAULT_BASE_URL).replace(/\/+$/, '');
+  const base = trimTrailingSlash(config.baseUrl ?? DEFAULT_BASE_URL);
   const woovi = createCoreClient(`${base}/api/v1`, {
     headers: { Authorization: config.appId }, // sem "Bearer": é o formato da Woovi
   });

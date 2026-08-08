@@ -25,4 +25,11 @@ describe('formatCountdown — mm:ss com piso em zero', () => {
   it('arredonda para baixo (999ms ainda é 00:00)', () => {
     expect(formatCountdown(999)).toBe('00:00');
   });
+
+  it('acima de 1h ganha segmento de horas — TTL de 24h do sandbox mostra 24:00:00, não 1440:00', () => {
+    expect(formatCountdown(86_400_000)).toBe('24:00:00');
+    expect(formatCountdown(3_600_000)).toBe('1:00:00');
+    expect(formatCountdown(3_661_000)).toBe('1:01:01');
+    expect(formatCountdown(3_599_000)).toBe('59:59'); // 1s antes de 1h continua mm:ss
+  });
 });

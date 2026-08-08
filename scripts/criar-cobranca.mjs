@@ -7,6 +7,7 @@
  * Idempotencia (T011): CORRELATION_ID=algum-uuid npm run cobranca  (2x)
  */
 import { createCoreClient } from '../packages/pixcheckout/src/core/index.ts';
+import { formatBRL } from '../packages/pixcheckout/src/i18n/texts.ts';
 
 try {
   process.loadEnvFile('.env');
@@ -40,7 +41,7 @@ const cobranca = await woovi.createCharge({
 console.log('\n=== COBRANCA CRIADA (ou recuperada, se o ID ja existia) ===');
 console.log('correlationID :', cobranca.correlationID);
 console.log('status        :', cobranca.status);
-console.log('valor         : R$', (cobranca.value / 100).toFixed(2));
+console.log('valor         :', formatBRL(cobranca.value));
 console.log('expira em     :', Math.round((cobranca.expiresAt - Date.now()) / 1000), 'segundos');
 console.log('link          :', cobranca.paymentLinkUrl);
 console.log('\ncopia e cola (brCode):');

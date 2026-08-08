@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { texts } from '../i18n/texts';
+import { writeClipboard } from './clipboard';
+import { cx } from './theme';
 
 export interface PixCopyButtonProps {
   brCode: string;
@@ -21,15 +23,7 @@ export function PixCopyButton({ brCode, className }: PixCopyButtonProps) {
   useEffect(() => () => clearTimeout(timerRef.current), []);
 
   async function handleCopy() {
-    let ok = false;
-    if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      try {
-        await navigator.clipboard.writeText(brCode);
-        ok = true;
-      } catch {
-        ok = false;
-      }
-    }
+    const ok = await writeClipboard(brCode);
     if (ok) {
       setFailed(false);
       setCopied(true);
@@ -44,7 +38,7 @@ export function PixCopyButton({ brCode, className }: PixCopyButtonProps) {
     <>
       <button
         type="button"
-        className={className ? `pixck-btn pixck-btn-primary ${className}` : 'pixck-btn pixck-btn-primary'}
+        className={cx('pixck-btn pixck-btn-primary', className)}
         onClick={handleCopy}
         aria-live="polite"
       >

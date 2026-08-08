@@ -1,10 +1,13 @@
 'use client';
 
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import { isAbortError } from '../core/client';
+import { createCorrelationID } from '../core/ids';
 import { transition } from '../core/machine';
 import { MAX_CONSECUTIVE_FAILURES, nextDelay } from '../core/polling';
 import { PixError } from '../core/types';
 import type { Charge, CheckoutState } from '../core/types';
+import { writeClipboard } from './clipboard';
 import { useWooviContext } from './WooviProvider';
 
 export interface UsePixChargeOptions {
@@ -38,10 +41,6 @@ function toPixError(err: unknown): PixError {
   return new PixError('network', err instanceof Error ? err.message : 'Falha de rede');
 }
 
-function isAbort(err: unknown): boolean {
-  return err instanceof Error && err.name === 'AbortError';
-}
-
 /**
  * A camada headless (FR-012): todo o comportamento do checkout, nenhum visual.
  * O reducer puro `transition` é a única fonte de mudança de estado; os efeitos
@@ -54,7 +53,7 @@ export function usePixCharge(options: UsePixChargeOptions): UsePixChargeResult {
 
   // Uma intenção de compra = um correlationID (R9). StrictMode monta duas
   // vezes? O ID é o mesmo, então a Woovi devolve a MESMA cobrança (FR-020).
-  const [intentId, setIntentId] = useState(() => crypto.randomUUID());
+  const [intentId, setIntentId] = useState(() => createCorrelationID());
   const [now, setNow] = useState(() => Date.now());
 
   const stateRef = useRef(state);
@@ -80,7 +79,7 @@ export function usePixCharge(options: UsePixChargeOptions): UsePixChargeResult {
         if (!cancelled) dispatch({ type: 'CHARGE_READY', charge });
       })
       .catch((err: unknown) => {
-        if (!cancelled && !isAbort(err)) dispatch({ type: 'CREATE_FAILED', error: toPixError(err) });
+        if (!cancelled && !isAbortError(err)) dispatch({ type: 'CREATE_FAILED', error: toPixError(err) });
       });
     return () => {
       cancelled = true;
@@ -118,7 +117,7 @@ export function usePixCharge(options: UsePixChargeOptions): UsePixChargeResult {
         }
         schedule();
       } catch (err) {
-        if (stopped || isAbort(err)) return;
+        if (stopped || isAbortError(err)) return;
         failures += 1;
         if (failures >= MAX_CONSECUTIVE_FAILURES) {
           dispatch({ type: 'POLLING_LOST', error: toPixError(err) });
@@ -214,7 +213,7 @@ export function usePixCharge(options: UsePixChargeOptions): UsePixChargeResult {
   const startNewIntent = useCallback(() => {
     firedRef.current = { paid: false, expired: false };
     setNow(Date.now());
-    setIntentId(crypto.randomUUID());
+    setIntentId(createCorrelationID());
   }, []);
 
   const retry = useCallback(() => {
@@ -232,13 +231,8 @@ export function usePixCharge(options: UsePixChargeOptions): UsePixChargeResult {
   const copyToClipboard = useCallback(async () => {
     const current = stateRef.current;
     const code = 'charge' in current && current.charge ? current.charge.brCode : null;
-    if (!code || typeof navigator === 'undefined' || !navigator.clipboard) return false;
-    try {
-      await navigator.clipboard.writeText(code);
-      return true;
-    } catch {
-      return false;
-    }
+    if (!code) return false;
+    return writeClipboard(code);
   }, []);
 
   const charge = 'charge' in state && state.charge ? state.charge : null;

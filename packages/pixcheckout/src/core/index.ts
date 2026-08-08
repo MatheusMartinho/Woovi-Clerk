@@ -1,7 +1,8 @@
 /**
  * Subpath `pixcheckout/core`: a camada 1 inteira, utilizavel em Node puro.
  */
-export { createCoreClient, normalizeCharge } from './client.ts';
+export { createCoreClient, isAbortError, normalizeCharge, trimTrailingSlash } from './client.ts';
+export { createCorrelationID } from './ids.ts';
 export type { CoreClient, CoreClientOptions, RequestOptions } from './client.ts';
 export { transition } from './machine.ts';
 export {

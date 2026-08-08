@@ -6,7 +6,7 @@ import { formatBRL, texts } from '../i18n/texts';
 import { PixCopyButton } from './PixCopyButton';
 import { PixQRCode } from './PixQRCode';
 import { PixStatus } from './PixStatus';
-import { appearanceToVars } from './theme';
+import { appearanceToVars, cx } from './theme';
 import type { Appearance } from './theme';
 import { usePixCharge } from './usePixCharge';
 import { useWooviContext } from './WooviProvider';
@@ -63,10 +63,7 @@ export function PixCheckoutView({
   className,
 }: PixCheckoutViewProps) {
   return (
-    <div
-      className={className ? `pixck-root ${className}` : 'pixck-root'}
-      style={appearanceToVars(appearance)}
-    >
+    <div className={cx('pixck-root', className)} style={appearanceToVars(appearance)}>
       <div className="pixck-card" data-state={state.status} aria-live="polite">
         {state.status === 'creating' ? <CreatingSkeleton /> : null}
         {state.status === 'awaiting_payment' ? (
@@ -118,7 +115,9 @@ function Awaiting({ charge, remainingMs }: { charge: Charge; remainingMs: number
       <div className="pixck-body">
         {/* copia e cola ANTES do QR no DOM: prioridade no celular e em leitores de tela (FR-009) */}
         <div className="pixck-copyarea">
-          <p className="pixck-instructions">{texts.instructions}</p>
+          {/* a instrução certa para cada contexto: no celular ninguém aponta a câmera pra própria tela */}
+          <p className="pixck-instructions pixck-instructions--mobile">{texts.instructionsMobile}</p>
+          <p className="pixck-instructions pixck-instructions--wide">{texts.instructions}</p>
           <PixCopyButton brCode={charge.brCode} />
         </div>
         <div className="pixck-qrarea">

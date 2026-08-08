@@ -30,10 +30,16 @@ export function formatBRL(cents: number): string {
   return brl.format(cents / 100);
 }
 
-/** 90_000 → "01:30". Piso em 00:00 — contador nunca fica negativo. */
+/**
+ * 90_000 → "01:30"; acima de 1h ganha segmento de horas: 86_400_000 → "24:00:00".
+ * O TTL padrao do sandbox da Woovi e 24h — sem o segmento de horas o contador
+ * mostraria "1440:00" (bug achado pelo code review). Piso em 00:00.
+ */
 export function formatCountdown(ms: number): string {
   const totalSeconds = Math.max(0, Math.floor(ms / 1000));
-  const minutes = Math.floor(totalSeconds / 60);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
-  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  const mmss = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  return hours > 0 ? `${hours}:${mmss}` : mmss;
 }

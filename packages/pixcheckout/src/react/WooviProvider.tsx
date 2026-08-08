@@ -40,9 +40,15 @@ export function WooviProvider({ endpoint, appearance, client, children }: WooviP
     injectStyles();
   }, []);
 
+  // O client fica FORA do memo do valor de contexto, chaveado só por
+  // [client, endpoint]: appearance passado inline ({{...}} novo a cada render
+  // do pai) não pode recriar o client — os efeitos do hook (criação, polling)
+  // dependem da identidade dele, e recriá-lo reiniciaria a cobrança inteira
+  // a cada render (achado do code review).
+  const coreClient = useMemo(() => client ?? createCoreClient(endpoint!), [client, endpoint]);
   const value = useMemo<WooviContextValue>(
-    () => ({ client: client ?? createCoreClient(endpoint!), appearance }),
-    [client, endpoint, appearance],
+    () => ({ client: coreClient, appearance }),
+    [coreClient, appearance],
   );
 
   return <WooviContext.Provider value={value}>{children}</WooviContext.Provider>;

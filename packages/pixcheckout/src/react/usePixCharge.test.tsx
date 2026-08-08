@@ -121,6 +121,33 @@ describe('usePixCharge — criação', () => {
   });
 });
 
+describe('usePixCharge — provider não recria o client por render (achado do review)', () => {
+  it('re-render com appearance inline (objeto novo) NÃO cria outra cobrança', async () => {
+    const fake = makeFakeClient();
+    // provider por endpoint (client criado internamente) + appearance inline,
+    // como um integrador desavisado escreveria
+    function Wrapper({ children }: { children: ReactNode }) {
+      return (
+        <WooviProvider client={fake.client} appearance={{ colorPrimary: '#123456' }}>
+          {children}
+        </WooviProvider>
+      );
+    }
+    const { result, rerender } = renderHook(() => usePixCharge({ amount: 5000 }), {
+      wrapper: Wrapper,
+    });
+    await flush();
+    expect(result.current.state.status).toBe('awaiting_payment');
+
+    rerender(); // novo objeto appearance a cada render do wrapper
+    rerender();
+    await flush();
+
+    expect(fake.created.length).toBe(1); // uma intenção, uma cobrança — sempre
+    expect(result.current.state.status).toBe('awaiting_payment');
+  });
+});
+
 describe('usePixCharge — polling para e limpa (SC-004)', () => {
   it('pagou → paid, onPaid dispara UMA vez e o polling CESSA', async () => {
     const fake = makeFakeClient();

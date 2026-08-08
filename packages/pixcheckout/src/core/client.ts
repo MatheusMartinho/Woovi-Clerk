@@ -23,8 +23,17 @@ export interface CoreClient {
  * - no servidor:  createCoreClient('https://api.woovi-sandbox.com/api/v1',
  *                   { headers: { Authorization: appId } }) — fala com a Woovi
  */
+/** Aborto e sinal de cleanup, nao de falha — a definicao vive AQUI, num lugar so. */
+export function isAbortError(err: unknown): boolean {
+  return err instanceof Error && err.name === 'AbortError';
+}
+
+export function trimTrailingSlash(url: string): string {
+  return url.replace(/\/+$/, '');
+}
+
 export function createCoreClient(baseUrl: string, options: CoreClientOptions = {}): CoreClient {
-  const base = baseUrl.replace(/\/+$/, '');
+  const base = trimTrailingSlash(baseUrl);
   const doFetch = options.fetch ?? fetch;
   const headers = { 'Content-Type': 'application/json', ...options.headers };
 
@@ -34,7 +43,7 @@ export function createCoreClient(baseUrl: string, options: CoreClientOptions = {
       response = await doFetch(`${base}${path}`, { ...init, headers });
     } catch (err) {
       // Repassa aborts intactos (o hook os reconhece); embrulha o resto.
-      if (err instanceof Error && err.name === 'AbortError') throw err;
+      if (isAbortError(err)) throw err;
       throw new PixApiError(err instanceof Error ? err.message : 'Falha de rede');
     }
     if (!response.ok) {
